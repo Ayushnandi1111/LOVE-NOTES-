@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just For You</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind for Inter font and custom colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-pink': '#fbcfe8',
+                        'secondary-red': '#ef4444',
+                        'accent-gold': '#fcd34d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom animation for the heart pulse */
+        @keyframes pulse-once {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        .heart-pulse {
+            animation: pulse-once 0.3s ease-in-out;
+        }
+        .surprise-reveal {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInSlide 0.5s ease-out forwards;
+        }
+        @keyframes fadeInSlide {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-primary-pink to-white min-h-screen flex items-center justify-center p-4 font-sans transition-all duration-500">
+
+    <main id="main-content" class="w-full max-w-lg bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-6 sm:p-10 text-center space-y-8 border-t-4 border-secondary-red">
+
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800">
+            A Little Something, Just For You
+        </h1>
+
+        <p class="text-lg text-gray-600 leading-relaxed">
+            I hope this small page brings a big smile to your face. You mean the world to me, and I wanted to give you a moment of joy. There are a few little secrets hidden here...
+        </p>
+
+        <!-- The Main Interactive Heart Surprise (Surprise 2) -->
+        <div class="flex flex-col items-center justify-center space-y-4">
+            <!-- Heart SVG -->
+            <svg id="main-heart" onclick="triggerHeartSurprise()"
+                 class="w-20 h-20 text-secondary-red cursor-pointer transition-all duration-300 hover:scale-110"
+                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+
+            <p id="heart-message" class="text-sm font-medium text-gray-500 transition-opacity duration-300 opacity-0">
+                Click the heart!
+            </p>
+        </div>
+
+
+        <!-- The Button Reveal Surprise (Surprise 1) -->
+        <div class="pt-6 border-t border-primary-pink/50 space-y-4">
+            <button id="gift-button" onclick="revealGift()"
+                    class="w-full sm:w-auto px-8 py-3 bg-secondary-red text-white font-bold rounded-full shadow-lg hover:bg-red-600 transition duration-150 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-75">
+                Click for a Little Gift!
+            </button>
+
+            <!-- Initial content is now empty/placeholder, it will be filled by JS -->
+            <div id="surprise-text" class="hidden surprise-reveal mt-4 p-5 bg-accent-gold/20 text-gray-800 rounded-xl border-l-4 border-accent-gold shadow-inner">
+                <!-- Content will be added here by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- New Copyright Footer -->
+        <footer class="pt-4 mt-4 text-xs text-gray-400 border-t border-primary-pink/50">
+            &copy; 2025 AYUSH NANDI. All rights reserved.
+        </footer>
+
+    </main>
+
+    <script type="module">
+        // --- Firebase/Auth Setup (MANDATORY for Canvas Immersives) ---
+        // These global variables are provided by the canvas environment.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Accessing global variables (with fallbacks for local testing)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Optional: Set debug level for logging Firestore operations
+            setLogLevel('Debug');
+
+            // Handle authentication
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    if (initialAuthToken) {
+                        signInWithCustomToken(auth, initialAuthToken).catch(console.error);
+                    } else {
+                        signInAnonymously(auth).catch(console.error);
+                    }
+                }
+            });
+        }
+        // --- End Firebase/Auth Setup ---
+
+        const surpriseText = document.getElementById('surprise-text');
+        const giftButton = document.getElementById('gift-button');
+        const mainHeart = document.getElementById('main-heart');
+        const heartMessage = document.getElementById('heart-message');
+
+        // New array of quotes for Surprise 1
+        const QUOTES = [
+            {
+                text: "You are my greatest adventure.",
+                author: "The author of my heart"
+            },
+            {
+                text: "Where there is love, there is life.",
+                author: "Mahatma Gandhi"
+            },
+            {
+                text: "To the world you may be one person, but to one person you are the world.",
+                author: "Bill Wilson"
+            },
+            {
+                text: "Love is composed of a single soul inhabiting two bodies.",
+                author: "Aristotle"
+            },
+            {
+                text: "The best way to hold on to your dreams is with your hands and heart, but especially your heart.",
+                author: "Unknown"
+            }
+        ];
+
+        /**
+         * Surprise 1: Selects a random quote and reveals it when the button is clicked.
+         */
+        window.revealGift = function() {
+            if (surpriseText.classList.contains('hidden')) {
+                // 1. Select a random quote
+                const randomIndex = Math.floor(Math.random() * QUOTES.length);
+                const quote = QUOTES[randomIndex];
+
+                // 2. Populate the content dynamically
+                surpriseText.innerHTML = `
+                    <p class="italic">"${quote.text}"</p>
+                    <p class="mt-2 text-sm font-semibold text-gray-700">- ${quote.author}</p>
+                `;
+
+                // 3. Display the box with animation
+                surpriseText.classList.remove('hidden');
+                // Force a reflow before applying animation classes
+                void surpriseText.offsetWidth;
+                surpriseText.classList.add('surprise-reveal');
+                giftButton.textContent = "Thank You!";
+            }
+        }
+
+        /**
+         * Surprise 2: Triggers an animation and reveals a second message when the heart is clicked.
+         */
+        window.triggerHeartSurprise = function() {
+            // 1. Heart Animation
+            mainHeart.classList.remove('heart-pulse');
+            // Re-trigger animation by forcing reflow
+            void mainHeart.offsetWidth;
+            mainHeart.classList.add('heart-pulse');
+            mainHeart.classList.add('text-pink-600'); // Change color slightly
+
+            // 2. Message reveal
+            heartMessage.textContent = "My heart belongs to you, always!";
+            heartMessage.classList.remove('opacity-0');
+            heartMessage.classList.add('opacity-100');
+            heartMessage.classList.add('text-secondary-red');
+            heartMessage.classList.remove('text-gray-500');
+
+            // 3. Disable further clicks after the first one
+            mainHeart.onclick = null;
+        }
+
+    </script>
+</body>
+</html>
